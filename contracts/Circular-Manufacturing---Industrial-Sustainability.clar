@@ -88,6 +88,15 @@
   { balance: uint }
 )
 
+(define-map carbon-footprints
+  { product-id: uint }
+  {
+    total-emissions: uint,
+    last-updated: uint,
+    units: (string-ascii 16)
+  }
+)
+
 (define-read-only (get-contract-owner)
   (var-get contract-owner)
 )
@@ -114,6 +123,10 @@
 
 (define-read-only (get-recycling-reward-rate)
   (var-get recycling-reward-rate)
+)
+
+(define-read-only (get-carbon-footprint (product-id uint))
+  (map-get? carbon-footprints { product-id: product-id })
 )
 
 (define-public (register-product (name (string-ascii 64)) (material-type (string-ascii 32)) (weight uint))
@@ -269,6 +282,63 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (var-set recycling-reward-rate new-rate)
     (ok true)
+  )
+)
+
+(define-public (update-carbon-footprint (product-id uint) (emissions uint) (units (string-ascii 16)))
+  (let
+    (
+      (product-data (unwrap! (map-get? products { product-id: product-id }) ERR_NOT_FOUND))
+      (current-time (unwrap-panic (get-stacks-block-info? time (- stacks-block-height u1))))
+      (existing-footprint (default-to
+        { total-emissions: u0, last-updated: u0, units: "" }
+        (map-get? carbon-footprints { product-id: product-id })
+      ))
+    )
+    (asserts! (is-eq tx-sender (get manufacturer product-data)) ERR_UNAUTHORIZED)
+    (map-set carbon-footprints
+      { product-id: product-id }
+      {
+        total-emissions: (+ (get total-emissions existing-footprint) emissions),
+        last-updated: current-time,
+        units: units
+      }
+    )
+    (ok true)
+  )
+)
+
+(define-public (register-product-with-carbon (name (string-ascii 64)) (material-type (string-ascii 32)) (weight uint) (initial-carbon uint) (units (string-ascii 16)))
+  (let
+    (
+      (product-id (var-get next-product-id))
+      (current-time (unwrap-panic (get-stacks-block-info? time (- stacks-block-height u1))))
+    )
+    (begin
+      (map-set products
+        { product-id: product-id }
+        {
+          manufacturer: tx-sender,
+          name: name,
+          material-type: material-type,
+          weight: weight,
+          created-at: current-time,
+          status: "active",
+          lifecycle-stage: "production"
+        }
+      )
+      (map-set carbon-footprints
+        { product-id: product-id }
+        {
+          total-emissions: initial-carbon,
+          last-updated: current-time,
+          units: units
+        }
+      )
+      (var-set next-product-id (+ product-id u1))
+      (unwrap-panic (update-manufacturer-quota tx-sender u1))
+      (ok product-id)
+    )
   )
 )
 
