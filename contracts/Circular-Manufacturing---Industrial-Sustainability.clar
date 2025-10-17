@@ -432,3 +432,59 @@
     )
   )
 )
+
+(define-data-var next-batch-id uint u1)
+
+(define-map product-batches
+  { batch-id: uint }
+  {
+    manufacturer: principal,
+    product-ids: (list 100 uint),
+    batch-size: uint,
+    created-at: uint,
+    status: (string-ascii 16)
+  }
+)
+
+(define-read-only (get-product-batch (batch-id uint))
+  (map-get? product-batches { batch-id: batch-id })
+)
+
+(define-public (create-product-batch (product-ids (list 100 uint)) (batch-size uint))
+  (let
+    (
+      (batch-id (var-get next-batch-id))
+      (current-time (unwrap-panic (get-stacks-block-info? time (- stacks-block-height u1))))
+    )
+    (begin
+      (asserts! (> batch-size u0) ERR_INVALID_AMOUNT)
+      (asserts! (is-eq (len product-ids) batch-size) ERR_INVALID_AMOUNT)
+      (map-set product-batches
+        { batch-id: batch-id }
+        {
+          manufacturer: tx-sender,
+          product-ids: product-ids,
+          batch-size: batch-size,
+          created-at: current-time,
+          status: "active"
+        }
+      )
+      (var-set next-batch-id (+ batch-id u1))
+      (ok batch-id)
+    )
+  )
+)
+
+(define-public (update-batch-status (batch-id uint) (new-status (string-ascii 16)))
+  (let
+    (
+      (batch-data (unwrap! (map-get? product-batches { batch-id: batch-id }) ERR_NOT_FOUND))
+    )
+    (asserts! (is-eq tx-sender (get manufacturer batch-data)) ERR_UNAUTHORIZED)
+    (map-set product-batches
+      { batch-id: batch-id }
+      (merge batch-data { status: new-status })
+    )
+    (ok true)
+  )
+)

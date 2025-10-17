@@ -10,6 +10,7 @@ A blockchain-based solution for tracking industrial product lifecycles, managing
 - 🏆 **Manufacturer Quotas** - Enforce recycling quotas and sustainability goals
 - 🔌 **IoT Integration** - Connect sensors for automated data collection
 - 💰 **EcoToken Rewards** - Incentivize sustainable practices
+- 📦 **Product Batch Management** - Group and manage related products efficiently
 
 ## 🚀 Quick Start
 
@@ -83,6 +84,8 @@ clarinet deploy --testnet
 - `register-iot-sensor(sensor-id, location, sensor-type)` - Add IoT sensor
 - `submit-sensor-data(sensor-id, product-id, data)` - Submit sensor readings
 - `transfer-tokens(recipient, amount)` - Transfer EcoTokens
+- `create-product-batch(product-ids, batch-size)` - Group products into batches
+- `update-batch-status(batch-id, new-status)` - Update batch lifecycle status
 
 ## 🏗️ Architecture
 
@@ -92,6 +95,7 @@ clarinet deploy --testnet
 - **Recycling Events** - Verified recycling activities with rewards
 - **Manufacturer Quotas** - Sustainability targets and compliance
 - **IoT Sensors** - Sensor registration and data collection
+- **Product Batches** - Grouped product collections for bulk operations
 
 ### Token Economy
 - **EcoTokens** - Fungible tokens rewarded for verified recycling
@@ -124,6 +128,7 @@ clarinet deploy --testnet
 - **Compliance Monitoring** - Enforce recycling quotas
 - **Transparency** - Full lifecycle visibility
 - **Efficiency** - Automated IoT data collection
+- **Batch Operations** - Streamlined management of product groups
 
 ## 🤝 Contributing
 
