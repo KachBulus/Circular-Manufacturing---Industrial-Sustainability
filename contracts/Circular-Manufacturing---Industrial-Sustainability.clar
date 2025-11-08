@@ -488,3 +488,45 @@
     (ok true)
   )
 )
+
+(define-map circularity-scores
+  { product-id: uint }
+  {
+    score: uint,
+    last-calculated: uint,
+    factors: { recycling-rate: uint, carbon-efficiency: uint, lifecycle-completeness: uint }
+  }
+)
+
+(define-read-only (get-circularity-score (product-id uint))
+  (map-get? circularity-scores { product-id: product-id })
+)
+
+(define-public (calculate-circularity-score (product-id uint))
+  (let
+    (
+      (product-data (unwrap! (map-get? products { product-id: product-id }) ERR_NOT_FOUND))
+      (carbon-data (default-to { total-emissions: u0, last-updated: u0, units: "" } (map-get? carbon-footprints { product-id: product-id })))
+      (recycling-events-count (var-get next-waste-id))
+      (lifecycle-stage (get lifecycle-stage product-data))
+      (recycling-rate (if (> recycling-events-count u0) (/ (* u100 (len (filter-recycling-events product-id))) recycling-events-count) u0))
+      (carbon-efficiency (if (> (get total-emissions carbon-data) u0) (/ u100000 (get total-emissions carbon-data)) u100))
+      (lifecycle-completeness (if (is-eq lifecycle-stage "disposed") u100 (if (is-eq lifecycle-stage "recycled") u80 u50)))
+      (total-score (/ (+ recycling-rate carbon-efficiency lifecycle-completeness) u3))
+      (current-time (unwrap-panic (get-stacks-block-info? time (- stacks-block-height u1))))
+    )
+    (map-set circularity-scores
+      { product-id: product-id }
+      {
+        score: total-score,
+        last-calculated: current-time,
+        factors: { recycling-rate: recycling-rate, carbon-efficiency: carbon-efficiency, lifecycle-completeness: lifecycle-completeness }
+      }
+    )
+    (ok total-score)
+  )
+)
+
+(define-private (filter-recycling-events (product-id uint))
+  (list u0)
+)

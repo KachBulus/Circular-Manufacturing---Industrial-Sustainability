@@ -11,6 +11,7 @@ A blockchain-based solution for tracking industrial product lifecycles, managing
 - 🔌 **IoT Integration** - Connect sensors for automated data collection
 - 💰 **EcoToken Rewards** - Incentivize sustainable practices
 - 📦 **Product Batch Management** - Group and manage related products efficiently
+- 🔄 **Circularity Score System** - Quantify product circularity with automated scoring based on recycling rates, carbon efficiency, and lifecycle completeness
 
 ## 🚀 Quick Start
 
@@ -86,6 +87,7 @@ clarinet deploy --testnet
 - `transfer-tokens(recipient, amount)` - Transfer EcoTokens
 - `create-product-batch(product-ids, batch-size)` - Group products into batches
 - `update-batch-status(batch-id, new-status)` - Update batch lifecycle status
+- `calculate-circularity-score(product-id)` - Compute and store circularity score for a product
 
 ## 🏗️ Architecture
 
@@ -96,6 +98,7 @@ clarinet deploy --testnet
 - **Manufacturer Quotas** - Sustainability targets and compliance
 - **IoT Sensors** - Sensor registration and data collection
 - **Product Batches** - Grouped product collections for bulk operations
+- **Circularity Scores** - Automated scoring system quantifying product circularity based on multiple sustainability factors
 
 ### Token Economy
 - **EcoTokens** - Fungible tokens rewarded for verified recycling
@@ -129,6 +132,7 @@ clarinet deploy --testnet
 - **Transparency** - Full lifecycle visibility
 - **Efficiency** - Automated IoT data collection
 - **Batch Operations** - Streamlined management of product groups
+- **Circularity Scoring** - Data-driven assessment of product sustainability performance
 
 ## 🤝 Contributing
 
