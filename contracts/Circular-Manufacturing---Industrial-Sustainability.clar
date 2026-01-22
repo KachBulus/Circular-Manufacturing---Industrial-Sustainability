@@ -527,6 +527,21 @@
   )
 )
 
+(define-public (transfer-product-ownership (product-id uint) (new-owner principal))
+ (let
+   (
+     (product-data (unwrap! (map-get? products { product-id: product-id }) ERR_NOT_FOUND))
+   )
+   (asserts! (is-eq tx-sender (get manufacturer product-data)) ERR_UNAUTHORIZED)
+   (map-set products
+     { product-id: product-id }
+     (merge product-data { manufacturer: new-owner })
+   )
+   (unwrap-panic (add-product-event product-id "ownership-transfer" "" "transferred"))
+   (ok true)
+ )
+)
+
 (define-private (filter-recycling-events (product-id uint))
   (list u0)
 )
